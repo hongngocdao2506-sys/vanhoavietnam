@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trò Chơi Trắc Nghiệm - Ngày Hội Môn Chuyên</title>
+    <style>
+        :root {
+            --bg-color: #fdf5e6; /* Màu nền kem tươi sáng */
+            --primary: #ff6b6b;  /* Đỏ cam năng động */
+            --secondary: #4ecdc4; /* Xanh mint tươi mát */
+            --text-dark: #2d3436;
+            --box-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            background-image: linear-gradient(120deg, #fdf5e6 0%, #ffeaa7 100%);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .quiz-container {
+            background-color: var(--box-bg);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-header {
+            text-align: center;
+            border-bottom: 2px dashed #eee;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .quiz-header h1 {
+            color: var(--primary);
+            margin: 0;
+            font-size: 2em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .quiz-header p {
+            color: #777;
+            font-weight: 500;
+        }
+
+        .question-number {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 15px;
+            display: inline-block;
+            background: #eafffd;
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background-color: #f8f9fa;
+            border: 2px solid #e9ecef;
+            padding: 15px 25px;
+            font-size: 1.1em;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            color: var(--text-dark);
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #eafffd;
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .option-btn.wrong {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .score-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .next-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: none; /* Ẩn cho đến khi chọn đáp án */
+        }
+
+        .next-btn:hover {
+            background-color: #ff4757;
+        }
+
+        #resultScreen {
+            display: none;
+            text-align: center;
+        }
+
+        #resultScreen h2 {
+            color: var(--primary);
+            font-size: 2.5em;
+        }
+
+        .restart-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .restart-btn:hover {
+            background-color: #1dd1a1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <div id="quizScreen">
+            <div class="quiz-header">
+                <h1>🔥 Đường Đua Văn Học</h1>
+                <p>Ngày Hội Môn Chuyên - Thử Thách Tri Thức</p>
+            </div>
+
+            <div class="question-number" id="questionNumber">Câu 1 / 30</div>
+            <div class="question-text" id="questionText">Nội dung câu hỏi sẽ hiển thị ở đây...</div>
+
+            <div class="options-grid" id="optionsContainer">
+                </div>
+
+            <div class="controls">
+                <div class="score-display">Điểm: <span id="scoreValue">0</span></div>
+                <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Câu Tiếp Theo ➔</button>
+            </div>
+        </div>
+
+        <div id="resultScreen">
+            <h2>🎉 Hoàn Thành! 🎉</h2>
+            <p style="font-size: 1.3em;">Bạn đã trả lời đúng <strong id="finalScore" style="color: var(--primary);">0</strong> trên tổng số <strong id="totalQuestions">30</strong> câu hỏi.</p>
+            <p style="color: #777; margin-bottom: 30px;" id="feedbackText">Tuyệt vời! Kiến thức văn học của bạn rất đáng nể.</p>
+            <button class="restart-btn" onclick="restartQuiz()">Chơi Lại Từ Đầu</button>
+        </div>
+    </div>
+
+    <script>
+        // Ngân hàng 30 câu hỏi của bạn (Đã chỉnh sửa đáp án câu Linh Sơn và Đồng Chí)
+        const questions = [
+            { q: "Tác phẩm nào đã giúp Gabriel García Márquez nhận giải Nobel Văn học năm 1982?", options: ["Trăm năm cô đơn", "Tình yêu thời thổ tả", "Tình yêu trong thời đại của dịch bệnh", "Không phải để diễn thuyết"], a: 0 },
+            { q: "Nhà văn nào đã đoạt giải Nobel Văn học năm 1913 với tác phẩm “Thơ dâng”?", options: ["Thomas Mann", "Bob Dyland", "Rabindranath Tagore", "Franz Kafka"], a: 2 },
+            { q: "Ai là cha đẻ của tác phẩm “Ông già và biển cả” đoạt giải Nobel Văn học năm 1954?", options: ["John Steinbeck", "Ernest Hemingway", "William Faulkner", "Albert Camus"], a: 1 },
+            { q: "Tác phẩm nào của Yasunari Kawabata mang lại giải Nobel đầu tiên cho Nhật Bản?", options: ["Xứ tuyết", "Ngàn cánh hạc", "Cố đô", "Đẹp và buồn"], a: 0 },
+            { q: "Tác phẩm “Linh sơn” đoạt giải Nobel văn học năm 2000 là của tác giả nào?", options: ["Cao Hành Kiện", "Mạc Ngôn", "Lỗ Tấn", "Kim Dung"], a: 0 }, // Đã sửa thành Cao Hành Kiện
+            { q: "Nhà văn Han Kang (Hàn Quốc) đoạt giải Nobel Văn học năm nào?", options: ["2021", "2022", "2023", "2024"], a: 3 },
+            { q: "Tác giả nào được mệnh danh là “mặt trời của thi ca Nga”?", options: ["Vladimir Mayakovsky", "Sergei Yesenin", "Evgheny Evtusenko", "Aleksandr Sergeevich Pushkin"], a: 3 },
+            { q: "Ai được xem là cha đẻ của chủ nghĩa hiện thực huyền ảo?", options: ["Gabriel Garcia Marquez", "Haruki Murakami", "Victor Hugo", "Mark Twain"], a: 0 },
+            { q: "Tác phẩm nghệ thuật như một “Tảng băng trôi” là nguyên lí sáng tác do nhà văn nào đề ra?", options: ["Lev Tolstoy", "Ernest Hemingway", "William Faulkner", "Albert Camus"], a: 1 },
+            { q: "Tác phẩm đoạt giải Nobel nào đã được chuyển thể thành phim?", options: ["“Bác sĩ Zhivago”", "“Ông già và biển cả”", "“Trăm năm cô đơn”", "Tất cả các thông tin trên đều đúng"], a: 3 },
+            { q: "Tác phẩm “Truyện Kiều” của Nguyễn Du thuộc thể loại nào?", options: ["Trường ca", "Truyện thơ Nôm", "Khúc ngâm", "Tiểu thuyết"], a: 1 },
+            { q: "Nhân vật Chí Phèo trong tác phẩm cùng tên của Nam Cao là đại diện cho tầng lớp nào?", options: ["Địa chủ phong kiến", "Người nông dân bị tha hóa", "Dân nghèo thành thị", "Trí thức tiểu tư sản"], a: 1 },
+            { q: "Trong “Vợ nhặt” của Kim Lân, tình huống “nhặt vợ” xảy ra trong hoàn cảnh nào?", options: ["Kháng chiến chống Pháp", "Nạn đói năm 1945", "Thời kỳ đổi mới", "Cách mạng tháng Tám"], a: 1 },
+            { q: "Bài thơ “Việt Bắc” ra đời trong hoàn cảnh nào?", options: ["Tác giả ở chiến khu Việt Bắc chống Pháp", "TW Đảng và Chính phủ rời chiến khu về Hà Nội (1954)", "Sau chiến thắng Điện Biên Phủ", "Khi đất nước thống nhất 1975"], a: 1 },
+            { q: "Chị Dậu là nhân vật trong tác phẩm nào?", options: ["Bước đường cùng", "Tắt đèn", "Cơm thầy cơm cô", "Trẻ con không được ăn thịt chó"], a: 1 },
+            { q: "“Nhật ký trong tù” của Hồ Chí Minh được sáng tác trong hoàn cảnh nào?", options: ["Khi hoạt động tại Pháp", "Khi bị giam ở Trung Quốc", "Sau kháng chiến chống Pháp", "Khi lãnh đạo cách mạng tháng Tám"], a: 1 },
+            { q: "Nhân vật Lão Hạc trong truyện cùng tên của Nam Cao đã bán con chó vàng vì lý do gì?", options: ["Để trả nợ cho con", "Để dành tiền cho con", "Để mua lương thực", "Vì con vàng ăn quá nhiều"], a: 1 },
+            { q: "Bài thơ “Đồng chí” của Chính Hữu kết thúc với hình ảnh nào?", options: ["Thương nhau tay nắm lấy bàn tay", "Đêm rét chung chăn thành đôi tri kỉ", "Đầu súng trăng treo", "Giếng nước gốc đa nhớ người ra lính"], a: 2 }, // Đã sửa thành Đầu súng trăng treo
+            { q: "Tác phẩm “Số đỏ” của Vũ Trọng Phụng phê phán thực trạng nào?", options: ["Cuộc sống nông thôn lạc hậu", "Bản chất hai mặt, lố bịch của dân thành thị trong cơn lốc Âu hóa", "Giá trị đạo đức phong kiến suy đồi", "Phong trào cải cách nửa vời"], a: 1 },
+            { q: "Tác phẩm “Lục Vân Tiên” của Nguyễn Đình Chiểu đề cao điều gì?", options: ["Tinh thần yêu nước", "Tình yêu đôi lứa", "Lòng nhân nghĩa, đạo lý làm người", "Khát vọng tự do"], a: 2 },
+            { q: "Ai hiện đang Chủ tịch Hội Nhà văn TP Hồ Chí Minh?", options: ["Nhà văn Bích Ngân", "Nhà văn Nguyễn Nhật Ánh", "Nhà thơ Nguyễn Sỹ Sáu", "Nhà văn Lê Văn Thảo"], a: 0 },
+            { q: "Chủ đề kỷ niệm 50 năm Giải phóng miền Nam (30/4/1975-30/4/2025) của TP.HCM là:", options: ["50 năm tự hào những chiến công", "50 năm văn minh, giàu đẹp, nghĩa tình", "50 năm xây dựng và phát triển", "50 năm tự hào bản anh hùng ca"], a: 3 },
+            { q: "Nhà văn Sơn Nam được gọi là:", options: ["Nhà văn của nông thôn miền Nam", "Nhà văn của Nam Bộ", "Nhà thơ cách mạng", "Nhà văn của tuổi trẻ"], a: 1 },
+            { q: "Tác phẩm “Mùa len trâu” của Sơn Nam viết về cuộc sống của ai?", options: ["Người nông dân miền Tây Nam Bộ", "Công nhân nhà máy", "Thương gia người Hoa", "Tầng lớp địa chủ"], a: 0 },
+            { q: "“Gia Định thành thông chí” là tác phẩm của ai?", options: ["Trịnh Hoài Đức", "Nguyễn Trãi", "Nguyễn Đình Chiểu", "Sơn Nam"], a: 0 },
+            { q: "“Đất rừng phương Nam” của Đoàn Giỏi viết về vùng đất nào?", options: ["Miền Đông Nam bộ", "Miền Tây Nam Bộ", "Thành phố Hồ Chí Minh", "Vùng U Minh, Cà Mau"], a: 1 },
+            { q: "Tác phẩm “Sài Gòn tạp pín lù” của Vương Hồng Sển viết về điều gì?", options: ["Văn hóa Sài Gòn xưa", "Lịch sử chống Pháp", "Cuộc sống người lính", "Sự phát triển kinh tế"], a: 0 },
+            { q: "Trong bài thơ “Ta đi tới”, Tố Hữu đã dùng cụm từ nào để nói về TP.HCM?", options: ["Thần đồng đất thép", "Rực rỡ tên vàng", "Sài Gòn hoa lệ", "Giàu đẹp nghĩa tình"], a: 1 },
+            { q: "Tác phẩm “Sài Gòn thềm xưa nắng rụng” viết về điều gì?", options: ["Lịch sử trước 1975", "Thời kỳ đô thị hóa", "Những kỉ niệm với người thân, cuộc sống", "Những góc đẹp của Sài Gòn"], a: 2 },
+            { q: "Đường sách nào được mệnh danh là “đường sách đẹp” của Thành phố Hồ Chí Minh?", options: ["Đường sách Nguyễn Văn Bình", "Đường sách Thành phố Thủ Đức", "Đường sách cũ Trần Nhân Tôn", "Đường sách Nguyễn Thị Minh Khai"], a: 0 }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const questionNumberEl = document.getElementById('questionNumber');
+        const questionTextEl = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const scoreValueEl = document.getElementById('scoreValue');
+        
+        const quizScreen = document.getElementById('quizScreen');
+        const resultScreen = document.getElementById('resultScreen');
+
+        function loadQuestion() {
+            // Reset trạng thái
+            nextBtn.style.display = 'none';
+            optionsContainer.innerHTML = '';
+            
+            const currentQ = questions[currentQuestionIndex];
+            questionNumberEl.textContent = `Câu ${currentQuestionIndex + 1} / ${questions.length}`;
+            questionTextEl.textContent = currentQ.q;
+
+            // Tạo các nút đáp án
+            currentQ.options.forEach((optionText, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                // Đánh chữ A, B, C, D
+                const prefix = String.fromCharCode(65 + index); 
+                btn.innerHTML = `<strong>${prefix}.</strong> ${optionText}`;
+                btn.onclick = () => checkAnswer(index, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedIndex, selectedBtn) {
+            const currentQ = questions[currentQuestionIndex];
+            const allBtns = optionsContainer.querySelectorAll('.option-btn');
+            
+            // Vô hiệu hóa tất cả các nút sau khi đã chọn
+            allBtns.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === currentQ.a) {
+                selectedBtn.classList.add('correct');
+                score++;
+                scoreValueEl.textContent = score;
+            } else {
+                selectedBtn.classList.add('wrong');
+                // Hiển thị đáp án đúng
+                allBtns[currentQ.a].classList.add('correct');
+            }
+
+            nextBtn.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizScreen.style.display = 'none';
+            resultScreen.style.display = 'block';
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('totalQuestions').textContent = questions.length;
+
+            const feedback = document.getElementById('feedbackText');
+            if(score === questions.length) {
+                feedback.textContent = "Tuyệt vời! Bạn là một Master Văn Học thực thụ!";
+            } else if(score >= 20) {
+                feedback.textContent = "Rất tốt! Nền tảng kiến thức của bạn cực kỳ vững chắc.";
+            } else {
+                feedback.textContent = "Hoàn thành nhiệm vụ! Đây là cơ hội tuyệt vời để ôn lại kiến thức đó.";
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            scoreValueEl.textContent = score;
+            resultScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            loadQuestion();
+        }
+
+        // Khởi chạy câu hỏi đầu tiên khi tải trang
+        loadQuestion();
+    </script>
+</body>
+</html>
